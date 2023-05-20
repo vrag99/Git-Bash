@@ -41,6 +41,8 @@ configureToLatestGPG () {
 # Checking if gpg and git are installed.
 if [ ! `which gpg` ] || [ ! `which git` ]; then
     echo "Install gpg and git before setting up."
+    echo "Download gpg from here: https://gnupg.org/download/"
+    echo "And git from here: https://git-scm.com/downloads"
     exit 1
 fi
 
