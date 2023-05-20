@@ -42,8 +42,7 @@ checkIfConfToLatestGPG () {
     if [ bool -eq "y" ]; then
         configureToLatestGPG
     elif [ bool -eq "n" ]; then
-        echo "Okay, exiting..."
-        exit 0
+        echo "Okay, continuing.."
     fi
 }
 #####################################################################
