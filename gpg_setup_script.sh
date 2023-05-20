@@ -57,46 +57,56 @@ if [ ! `which gpg` ] || [ ! `which git` ]; then
     exit 1
 fi
 
-if [[ `gpg --list-keys` ]] ; then
+while true;
 
-    instruction="Hey! You've previously generated keys. Do you want to..
-    (1) Use an existing one
-    (2) Generate a new one
-    (3) Delete any previous key"
+do
+    if [[ `gpg --list-keys` ]] ; then
 
-    gpgKeyPrompt="Enter the GPG Key ID to be used -->
-    (For example: in 'rsa3072/05F733A1C16AB0D4', 
-    '05F733A1C16AB0D4' is our GPG Key ID)"
-    
-    prettyPrint "$instruction"
+        instruction="Hey! You've previously generated keys. Do you want to..
+        (1) Use an existing one
+        (2) Generate a new one
+        (3) Delete any previous key
+        (4) Quit"
 
-    echo -n "Enter your choice (1/2/3): "
-    read choice
-
-    if [ $choice -eq 1 ]; then
-        gpg --list-secret-keys --keyid-format=long
-        prettyPrint "$gpgKeyPrompt"
+        gpgKeyPrompt="Enter the GPG Key ID to be used -->
+        (For example: in 'rsa3072/05F733A1C16AB0D4', 
+        '05F733A1C16AB0D4' is our GPG Key ID)"
         
-        # Taking the key to be used and configuring it for signing commits by default.
-        read key
-        gitConfig $key
-    
-    elif [ $choice -eq 2 ]; then
+        prettyPrint "$instruction"
+
+        echo -n "Enter your choice (1/2/3/4): "
+        read choice
+
+        if [ $choice -eq 1 ]; then
+            gpg --list-secret-keys --keyid-format=long
+            prettyPrint "$gpgKeyPrompt"
+            
+            # Taking the key to be used and configuring it for signing commits by default.
+            read key
+            gitConfig $key
+        
+        elif [ $choice -eq 2 ]; then
+            gpg --full-generate-key
+            checkIfConfToLatestGPG
+
+        elif [ $choice -eq 3 ]; then
+            gpg --list-secret-keys --keyid-format=long
+            prettyPrint "$gpgKeyPrompt"
+            read key
+            gpg --delete-secret-key $key
+            gpg --delete-key $key
+
+        elif [ $choice -eq 4 ]; then
+            echo "Byeee"
+            exit 0
+        fi
+
+    else
+        # Generate a key if user doesn't have any.
+        prettyPrint "It seems you don't have any gpg keys generated..
+        Generating one for you :)"
         gpg --full-generate-key
         checkIfConfToLatestGPG
-
-    elif [ $choice -eq 3 ]; then
-        gpg --list-secret-keys --keyid-format=long
-        prettyPrint "$gpgKeyPrompt"
-        read key
-        gpg --delete-secret-key $key
-        gpg --delete-key $key
     fi
 
-else
-    # Generate a key if user doesn't have any.
-    prettyPrint "It seems you don't have any gpg keys generated..
-    Generating one for you :)"
-    gpg --full-generate-key
-    checkIfConfToLatestGPG
-fi
+done
