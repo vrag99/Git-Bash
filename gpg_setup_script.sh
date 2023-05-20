@@ -35,6 +35,17 @@ configureToLatestGPG () {
     latestGPGKeyID=$(getLatestGPGKeyID)
     gitConfig $latestGPGKeyID
 }
+
+checkIfConfToLatestGPG () {
+    echo -n "Do you want this new key to be configutred as the git signing key? (y/n) "
+    read bool
+    if [ bool -eq "y" ]; then
+        configureToLatestGPG
+    elif [ bool -eq "n" ]; then
+        echo "Okay, exiting..."
+        exit 0
+    fi
+}
 #####################################################################
 
 
@@ -53,6 +64,10 @@ if [[ `gpg --list-keys` ]] ; then
     (2) Generate a new one
     (3) Delete any previous key"
 
+    gpgKeyPrompt="Enter the GPG Key ID to be used -->
+    (For example: in 'rsa3072/05F733A1C16AB0D4', 
+    '05F733A1C16AB0D4' is our GPG Key ID)"
+    
     prettyPrint "$instruction"
 
     echo -n "Enter your choice (1/2/3): "
@@ -60,7 +75,7 @@ if [[ `gpg --list-keys` ]] ; then
 
     if [ $choice -eq 1 ]; then
         gpg --list-secret-keys --keyid-format=long
-        echo -n "Enter the secret key to be used: "
+        prettyPrint "$gpgKeyPrompt"
         
         # Taking the key to be used and configuring it for signing commits by default.
         read key
@@ -68,14 +83,14 @@ if [[ `gpg --list-keys` ]] ; then
     
     elif [ $choice -eq 2 ]; then
         gpg --full-generate-key
-        configureToLatestGPG
+        checkIfConfToLatestGPG
 
     elif [ $choice -eq 3 ]; then
-        gpg --list-secret-keys
-        echo -n "Enter the secret key to be deleted: "
+        gpg --list-secret-keys --keyid-format=long
+        prettyPrint "$gpgKeyPrompt"
         read key
-        gpg --delete-key $key
         gpg --delete-secret-key $key
+        gpg --delete-key $key
     fi
 
 else
@@ -83,5 +98,5 @@ else
     prettyPrint "It seems you don't have any gpg keys generated..
     Generating one for you :)"
     gpg --full-generate-key
-    configureToLatestGPG
+    checkIfConfToLatestGPG
 fi
