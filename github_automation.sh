@@ -55,8 +55,6 @@ else
     exit 1
 fi
 
-echo $repoType
-
 response=$( makeNewRepo )
 
 if [[ "$response" =~ "\"message\": \"name already exists on this account\"" ]]; then
@@ -65,6 +63,7 @@ if [[ "$response" =~ "\"message\": \"name already exists on this account\"" ]]; 
     makeNewRepo    
 fi
 
+# Pushing the local repo
 mkdir $repo
 cd $repo
 git init
