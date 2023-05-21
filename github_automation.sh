@@ -33,10 +33,10 @@ else
     read -p -s "Enter your personal access token: " PAT
     echo "USERNAME=$USERNAME" > credentials.env
     echo "PAT=$PAT" >> credentials.env
+    chmod 400 credentials.env
 fi
 
 # Get the details for the repo to be created
-
 askRepoDetails
 
 if [[ $repoType = 1 ]]; then
@@ -55,8 +55,6 @@ else
     exit 1
 fi
 
-[[ $repoType = 1 ]] && repoType=false || repoType=true
-[[ $conf = 1 ]] && repoType=false || repoType=true
 echo $repoType
 
 response=$( makeNewRepo )
@@ -67,12 +65,11 @@ if [[ "$response" =~ "\"message\": \"name already exists on this account\"" ]]; 
     makeNewRepo    
 fi
 
-makeNewRepo
-
 mkdir $repo
 cd $repo
 git init
-echo "$0\ncredentials.env" > .gitignore
+echo `basename "$0"` > .gitignore
+echo "credentials.env" >> .gitignore
 echo "# $repo" > README.md
 git add .
 git commit -m "first commit"
